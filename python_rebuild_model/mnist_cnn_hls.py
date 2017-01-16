@@ -93,7 +93,7 @@ print('the input image shape: ',x_in.shape)
 #input of one picture to our own cnn
 #im_in = x_in.reshape(28,28,1)
 im_in = x_in.reshape(784) #flatten the input image
-
+np.savetxt('./input_3.txt',im_in,fmt='%5.20f')
 #layer_name:
 #layer 0: convolution2d_1
 #layer 1: activation_1
