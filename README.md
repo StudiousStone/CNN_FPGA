@@ -14,3 +14,5 @@ Normalization is needed after the extraction: x = x/255
 The mnist_cnn_eg.py can generate and train a simple CNN then output the weights and biases in the file mnist_cnn_trained.h5.
 
 The mnist_cnn_load.py can load the trained module and run the feedforward process by self-written code.
+
+The mnist_cnn_hls.py is a version in which all the weights and inputs are flattened into 1-dimension arraies. It also saves the weights and biases into the folder 'mnist_weight_bias'.
