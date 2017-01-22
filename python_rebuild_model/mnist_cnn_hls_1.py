@@ -1,7 +1,8 @@
 '''
 This version adds some optimization regarding:
-1.re-arrange the loop sturucture.
-2.adds loop tiling(not done yet).
+1.re-arranged the loop sturucture.
+2.transposed the dimensions of the weights so that loop tiling is eazy. 
+3.adds loop tiling(not done yet).
 '''
 
 from __future__ import print_function
@@ -178,24 +179,34 @@ print('the shape of 12th layer output(pre-trained model): ',layer_out_11.shape)
 
 #read the weights and biases, save them to txt files
 weights_0 = w_0[0] #the weights of first convolutional layer
+#weights_0 = weights_0.reshape(32,1,3,3)
+weights_0 = np.transpose(weights_0, (3,2,0,1))
+print('the shape of transposed weights_0 is ', weights_0.shape)
 weights_0 = weights_0.reshape(288) #flatten the weights
 np.savetxt('./mnist_weight_bias/weights_0.txt',weights_0,fmt='%5.20f')
 biases_0 = w_0[1]  #the biases of first convolutional layer
 np.savetxt('./mnist_weight_bias/biases_0.txt',biases_0,fmt='%5.20f')
 
 weights_2 = w_2[0] #the weights of second convolutional layer
+weights_2 = np.transpose(weights_2, (3,2,0,1))
+print('the shape of transposed weights_2 is ', weights_2.shape)
 weights_2 = weights_2.reshape(9216)
 np.savetxt('./mnist_weight_bias/weights_2.txt',weights_2,fmt='%5.20f')
 biases_2 = w_2[1] #the biases of second convolutional layer
 np.savetxt('./mnist_weight_bias/biases_2.txt',biases_2,fmt='%5.20f')
 
 weights_7 = w_7[0] #the weights of second convolutional layer
+weights_7 = np.transpose(weights_7, (1,0))
+print('the shape of transposed weights_7 is ', weights_7.shape)
 weights_7 = weights_7.reshape(589824)
 np.savetxt('./mnist_weight_bias/weights_7.txt',weights_7,fmt='%5.20f')
 biases_7 = w_7[1] #the biases of second convolutional layer
 np.savetxt('./mnist_weight_bias/biases_7.txt',biases_7,fmt='%5.20f')
 
+
 weights_10 = w_10[0] #the weights of second convolutional layer
+weights_10 = np.transpose(weights_10, (1,0))
+print('the shape of transposed weights_10 is ', weights_10.shape)
 weights_10 = weights_10.reshape(1280)
 np.savetxt('./mnist_weight_bias/weights_10.txt',weights_10,fmt='%5.20f')
 biases_10 = w_10[1] #the biases of second convolutional layer
@@ -217,7 +228,8 @@ for i in range(3): #filter size
             for col in range(26): #output column
                 for out_dep in range(32): #output put depth, number of filters
                     for in_dep in range(1): #input feature maps
-                        layer_out_0_fm[row][col][out_dep] += weights_0[((i*3+j)*1+in_dep)*32+out_dep]*im_in[((stride*row+i)*28+(stride*col+j))*1+in_dep]
+                        #layer_out_0_fm[row][col][out_dep] += weights_0[((i*3+j)*1+in_dep)*32+out_dep]*im_in[((stride*row+i)*28+(stride*col+j))*1+in_dep]
+                        layer_out_0_fm[row][col][out_dep] += weights_0[((out_dep*1+in_dep)*3+i)*3+j]*im_in[((stride*row+i)*28+(stride*col+j))*1+in_dep]
 
 #second layer, activation 1
 layer_out_1_fm = np.zeros((26,26,32),dtype=np.float32) #initialize output
@@ -246,7 +258,7 @@ for i in range(3): #filter size
             for col in range(24): #output column
                 for out_dep in range(32): #output put depth, number of filters
                     for in_dep in range(32): #input feature maps
-                        layer_out_2_fm[row][col][out_dep] += weights_2[((i*3+j)*32+in_dep)*32+out_dep]*layer_out_1_fm[stride*row+i][stride*col+j][in_dep]
+                        layer_out_2_fm[row][col][out_dep] += weights_2[((out_dep*32+in_dep)*3+i)*3+j]*layer_out_1_fm[stride*row+i][stride*col+j][in_dep]
                         
 #fourth layer, activation 2
 layer_out_3_fm = np.zeros((24,24,32),dtype=np.float32) #initialize output
@@ -281,7 +293,8 @@ for i in range(128): #initialize the output with biases
     for row in range(12): #output row
         for col in range(12): #output column
             for out_dep in range(32): #output put depth, number of filters
-                layer_out_7_fm[i] += layer_out_4_fm[row][col][out_dep]*weights_7[((row*12+col)*32+out_dep)*128+i]
+                #layer_out_7_fm[i] += layer_out_4_fm[row][col][out_dep]*weights_7[((row*12+col)*32+out_dep)*128+i]
+                layer_out_7_fm[i] += layer_out_4_fm[row][col][out_dep]*weights_7[((i*12+row)*12+col)*32+out_dep]
                 #In a 3D matrix the value at index (k,h,w) is pysically located at index (k * H + h) * W + w.
 
 #9th layer, activation 3, relu
@@ -296,13 +309,15 @@ for i in range(128):
 layer_out_10_fm = np.zeros(10,dtype=np.float32) #initialize output
 for i in range(10): #initialize the output with biases
     layer_out_10_fm[i] = biases_10[i]
-    for j in range(128): #output row
-        layer_out_10_fm[i] += layer_out_8_fm[j]*weights_10[j*10+i]
+    for j in range(128): #input
+        #layer_out_10_fm[i] += layer_out_8_fm[j]*weights_10[j*10+i]
+        layer_out_10_fm[i] += layer_out_8_fm[j]*weights_10[i*128+j]
         
 #12th layer, activation 4
 layer_out_11_fm = softmax(layer_out_10_fm)
 
 print('the final output',layer_out_11_fm)
+np.savetxt('./final_out.txt',layer_out_11_fm,fmt='%5.20f')
 print('golden output',layer_out_11)
 
 #----------------------------------------------------------------------------

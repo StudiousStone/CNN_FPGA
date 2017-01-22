@@ -325,7 +325,7 @@ print('golden output',layer_out_11)
 #        for col in range(26): #output column
 #            if(layer_out_0_fm[row][col][out_dep]!=layer_out_0[row][col][out_dep]):
 #               print('mismatch at position', row, col, out_dep)
-#               print('out:','%.10f' % layer_out_0_fm[row][col][out_dep],'golden: ','%.10f' % layer_out_0[row][col][out_dep])
+#                print('out:','%.10f' % layer_out_0_fm[row][col][out_dep],'golden: ','%.10f' % layer_out_0[row][col][out_dep])
 
 #test second layer's output(activation)
 #for out_dep in range(32): #output put depth, number of filters
@@ -367,7 +367,7 @@ print('golden output',layer_out_11)
 #for i in range(10):
 #    if layer_out_10_fm[i] != layer_out_10[i]:
 #        print('mistmatch at position ',i)
-#        print('out: ',layer_out_10_fm[i],'golden: ',layer_out_10[i])
+#   print('out: ',layer_out_10_fm[i],'golden: ',layer_out_10[i])
                 
 #if(np.array_equal(layer_out_0_fm,layer_out_0)):
 #    print('succeed!')
